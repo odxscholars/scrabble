@@ -555,7 +555,7 @@ void initializeLetterList(game *mainGame){
 int askForName(game *mainGame){
     char yesOrNo = 'y';
     int i = 0;
-    while (yesOrNo == 'y' && i <= 4){
+    while (yesOrNo == 'y' && i <= 4|| i < 2){
         printf("Enter name of player : ");
         scanf("%s", mainGame->players[i].name);
         mainGame->players[i].recordIndex = -1;
