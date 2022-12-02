@@ -21,6 +21,7 @@ This struct is used to store the information of a letter tile.
 
 @var letter: the letter of the tile which is a character
 @var value: the value or score of the letter which is an integer
+@var owner: the owner of the tile which refers to a playerIndex
 */
 
 struct letterTile{
@@ -47,7 +48,8 @@ typedef struct boardTile boardTile;
 
 /*
 The board struct is used the struct that is made up of individual board tiles.
-tiles - an 11 by 11  2d array of board tiles
+@var tiles - an 11 by 11  2d array of board tiles
+@var boardWords - amount of words in the board
 */
 struct board{
     boardTile tiles[11][11];
@@ -61,7 +63,8 @@ The player struct is used to store the information of a player.
 @var name - a string that contains the name of the player
 @var score - an integer that contains the score of the player
 @var letters - an array of letter tiles that contains the letters of the player that are initially availble
-
+@var recordIndex - the player's index in the records file.
+@var wordCount - the amount of words the player has made.
 
 */
 
@@ -100,9 +103,8 @@ typedef struct record record;
 /*
 The recordFile struct is used to store the different records that are available.
 @var filePath - a string that contains the path of the file
-@var file - a pointer to the file
 @var records - an array of records that contains the records of the players
-
+@var recordCount - the amount of records in the record file
 */
 struct recordFile{
     char filePath[100];
@@ -116,6 +118,7 @@ typedef struct recordFile recordFile;
 /*
 The dict struct is used to store the different words that are considered "valid"
 @var words - an array of 100 strings that contains the words that are considered valid
+@var wordCount - amount of words in word count;
 */
 struct dict{
     char words[100][10];
@@ -124,6 +127,15 @@ struct dict{
 
 typedef struct dict dict;
 
+
+/*
+The letterBank struct is used to store the different letter tiles that are available in the game. Also stores the amount of letters that can still be allotted to players.
+@var letters - an array of letter tiles that contains the letters that are available in the game
+@var letterCount - the amount of letters that are available in the game
+
+
+
+*/
 typedef struct letterBank{
     char letters[27];
     int letterCount[27];
@@ -137,7 +149,9 @@ Values of the different struct variables are then initialized throughout the gam
 @var gameBoard - a variable of the board struct that contains the board of the game
 @var players - an array of players that contains the players of the game
 @var dictionary - a variable of the dict struct that contains the dictionary of the game
-@var recordFile - a variable of the recordFile struct that contains the record file of the game
+@var records - a variable of the recordFile struct that contains the record file of the game
+@var currentPlayer - an integer that points to the current player of the game
+@var letterList - a variable of the letterBank struct that stores the different available letters in the game.
 */
 typedef struct game{
     int numPlayers;
@@ -152,6 +166,10 @@ typedef struct game{
 
 
 void loadDictionary(dict *dictionary){
+    /*
+    This function loads the dictionary of the game.
+    @param dictionary - a pointer to the dictionary of the game
+    */
     dictionary->wordCount = 0;
     FILE *file = fopen("dict.txt", "r");
     int i = 0;
@@ -164,6 +182,13 @@ void loadDictionary(dict *dictionary){
 
 
 bool searchWordInDictionary(char * key, dict *dictionary){
+    /*
+    This function searches for a word in the dictionary.
+    @param key - a string that contains the word to be searched
+    @param dictionary - a pointer to the dictionary of the game
+    @return - a boolean value that indicates if the word is found or not
+    */
+
     char newKey[10];
     strcpy(newKey, "");
     for(int i = 0; i < strlen(key); i++){
@@ -181,6 +206,11 @@ bool searchWordInDictionary(char * key, dict *dictionary){
 
 
 void initializeBoard(board *gameBoard){
+    /*
+    This function initializes the board of the game.
+    @param gameBoard - a pointer to the board of the game
+    */
+
     int i,j;
     for(i=0;i<11;i++){
         for(j=0;j<11 ;j++){
@@ -193,6 +223,12 @@ void initializeBoard(board *gameBoard){
 
 
 int getScoreOfCharacter(char letter){
+    /*
+    This function returns the score of a letter.
+    @param letter - a character that contains the letter
+    @return - an integer that contains the score of the letter
+    */
+
     char letters[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z', '_'};
     int score[] = {1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10,0};
     for(int i = 0; i < 27;i ++){
@@ -206,7 +242,13 @@ int getScoreOfCharacter(char letter){
 }
 
 
+
 void displayBoard(game * mainGame){
+    /*
+    This function displays the board of the game.
+    @param mainGame - a pointer to the game
+    */
+
     printf("   ");
     for(int i = 0; i < 10; i++){
         printf(" %d ", i);
@@ -236,6 +278,13 @@ void displayBoard(game * mainGame){
 
 }
 bool checkIfCoordinatesAreConnected(int yArr[], int xArr[], int size){
+    /*
+    This function checks if the coordinates of the tiles are connected.
+    @param yArr - an array of integers that contains the y coordinates of the tiles
+    @param xArr - an array of integers that contains the x coordinates of the tiles
+    @param size - an integer that contains the size of the arrays
+    @return - a boolean value that indicates if the coordinates are connected or not
+    */
     for(int i = 0; i < size; i++){
         if (size > i + 1){
             //compute for distance between two points
@@ -257,6 +306,12 @@ bool checkIfCoordinatesAreConnected(int yArr[], int xArr[], int size){
 }
 
 char getRandomLetter(game * mainGame){
+    /*
+    This function returns a random letter from the letter bank.
+    @param mainGame - a pointer to the game
+    @return - a character that contains the random letter
+    */
+
     int random = 0;
     char letter;
     do{
@@ -276,6 +331,12 @@ void swapPlayerLetterWithNewOne(game * mainGame, char oldLetter){
     
 }
 void addScorePlayer(char letter, game * mainGame){
+    /*
+    This function adds the score of a letter to the player's score.
+    @param letter - a character that contains the letter
+    @param mainGame - a pointer to the game
+    */
+
     int score = getScoreOfCharacter(letter);
     mainGame->players[mainGame->currentPlayer].score += score;
 }
@@ -291,7 +352,7 @@ void changeTurn(game * mainGame){
     }
 
 
-}
+
 
 void setStringToEmpty(int n, char *string){
     for(int i = 0; i < n; i++){
@@ -319,7 +380,13 @@ bool checkIfWordIsInLetters(char * temp, game * mainGame){
 }
 
 
+}
 void choiceController(game * mainGame){
+    /*
+    This function controls the choices of the player.
+    @param mainGame - a pointer to the game
+    */
+   
     char temp[15] = "\0";
     char temp1[20];
     for(int i = 0; i < 20; i++){
@@ -552,6 +619,11 @@ void choiceController(game * mainGame){
     
 }
 void displayHUD(game * mainGame){
+    /*
+    This function displays the HUD that is important to the player.
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
     printf("Player's high score: %d\n", mainGame->records.records[mainGame->players[mainGame->currentPlayer].recordIndex].highestScore);
     printf("Player %d's turn\n", mainGame->currentPlayer);
     printf("Player %s's turn\n", mainGame->players[mainGame->currentPlayer].name);
@@ -571,6 +643,11 @@ void displayHUD(game * mainGame){
 
 
 void givePlayerTiles(game * mainGame){
+    /*
+    This function gives the player 7 tiles at the start of the game.
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
     int randNum = 0;
     for(int j = 0; j < mainGame->numPlayers; j++){
         for(int i = 0; i < 7; i++){
@@ -595,6 +672,11 @@ void givePlayerTiles(game * mainGame){
 }
 
 void initializeLetterList(game *mainGame){
+    /*
+    This function initializes the letter list struct.
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
     char letter[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z', '_'};
     int quantityOfEachChar[] = {9,2,2,4,12,2,3,2,9,1,1,4,2,6,8,2,1,6,4,6,4,2,2,1,2,1,2};
     for(int i = 0; i < 27; i++){
@@ -604,13 +686,21 @@ void initializeLetterList(game *mainGame){
 }
 
 int askForName(game *mainGame){
+    /*
+    This function asks the user for the name of the player.
+    @param mainGame: the game struct that contains all the information about the game
+    @return i which is the number of players that were added
+    */
     char yesOrNo = 'y';
     int i = 0;
-    while (yesOrNo == 'y' && i <= 4 ){
+    while (yesOrNo == 'y' && i <= 4|| i < 2){
         printf("Enter name of player : ");
         scanf("%s", mainGame->players[i].name);
         mainGame->players[i].recordIndex = -1;
         printf("Do you want to add another player? (y/n) : ");
+        if (i < 2){
+            printf("There must be at least two players to start a game.\n");
+        }
         scanf(" %c", &yesOrNo);
         i++;
     }
@@ -620,6 +710,11 @@ int askForName(game *mainGame){
 
 }
 void initializeRecords(game * mainGame){
+    /*
+    This function initializes the records struct.
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
     FILE *fp;
     do{
         printf("Enter file path: ");
@@ -648,6 +743,11 @@ void initializeRecords(game * mainGame){
 
 
 bool checkWinCondition(game *mainGame){
+    /*
+    This function checks if the win condition has been met.
+    @param mainGame: the game struct that contains all the information about the game
+    @return true if the win condition has been met, false otherwise
+    */
     int maxScore = 0;
     int wordCount = 0;
     for (int i = 0; i < mainGame->numPlayers; i++){
@@ -667,6 +767,11 @@ bool checkWinCondition(game *mainGame){
 
 
 void matchRecords(game *mainGame){
+    /*
+    This function matches the records struct with the players struct.
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
     for(int i = 0; i < mainGame->records.recordCount; i++){
         for(int j = 0; j < mainGame->numPlayers; j++){
             if (strcmp(mainGame->players[j].name, mainGame->records.records[i].name) == 0){
@@ -680,6 +785,11 @@ void matchRecords(game *mainGame){
 }
 
 void createNewRecord(game * mainGame){
+    /*
+    This function creates a new record for a player.
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
     for(int i = 0; i < mainGame->numPlayers; i++){
         if (mainGame->players[i].recordIndex == -1){
             printf("Creating new record for %s\n", mainGame->players[i].name);
@@ -692,6 +802,11 @@ void createNewRecord(game * mainGame){
 
 }
 void initPlayersToEmpty(game *mainGame){
+    /*
+    This function initializes the players struct to empty.
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
     for(int i = 0; i < mainGame->numPlayers; i++){
         mainGame->players[i].score = 0;
         mainGame->players[i].wordCount = 0;
@@ -711,6 +826,12 @@ void initPlayersToEmpty(game *mainGame){
 }
 
 void lookForLongestWord(int index, game* mainGame){
+    /*
+    This function looks for the longest word in the words array.
+    @param index: the index of the player in the players struct
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
     char longestWord[15];
     strcpy(longestWord, "");
     int playerIndex = mainGame->players[index].recordIndex;
@@ -728,7 +849,13 @@ void lookForLongestWord(int index, game* mainGame){
 }
 
 void updateRecords(game *mainGame){
-   
+    /*
+    This function updates the records struct.
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
+
+    printf("update records Player's high score: %d\n", mainGame->records.records[mainGame->players[mainGame->currentPlayer].recordIndex].highestScore);
     for(int i = 0; i < mainGame->numPlayers; i++){
         lookForLongestWord(i, mainGame);
         if (mainGame->players[i].score > mainGame->records.records[mainGame->players[i].recordIndex].highestScore){
@@ -745,6 +872,12 @@ void updateRecords(game *mainGame){
 }
 
 void writeToRecordFile(game *mainGame){
+    /*
+    This function writes the records struct to the records file.
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
+
     FILE *fp;
     fp = fopen(mainGame->records.filePath, "w");
     if (fp == NULL){
@@ -767,6 +900,11 @@ void writeToRecordFile(game *mainGame){
 }
 
 void driver(game * mainGame){
+    /*
+    This function is the driver function for the game.
+    @param mainGame: the game struct that contains all the information about the game
+
+    */
     mainGame->currentPlayer = 0;
     //INIT GAME ELEMS
     initializeBoard(&mainGame->gameBoard);
