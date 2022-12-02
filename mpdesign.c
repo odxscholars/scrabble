@@ -242,9 +242,7 @@ bool checkIfCoordinatesAreConnected(int yArr[], int xArr[], int size){
             int xDistance = abs(xArr[i] - xArr[i+1]);
             int yDistance = abs(yArr[i] - yArr[i+1]);
             if (xDistance + yDistance > 1){
-                printf("Size: %d, i: %d\n", size, i);
-                printf("False in i: %d\n", i);
-                printf("Comparing %d and %d\n", xArr[i], xArr[i+1]);
+                
                 return false;
             }
 
@@ -264,7 +262,7 @@ char getRandomLetter(game * mainGame){
     do{
         random = rand() % 27;
         letter = mainGame->letterList.letters[random];
-        printf("amt: %d\n", mainGame->letterList.letterCount[random]);
+       
     }while(mainGame->letterList.letterCount[random] == 0);
     mainGame->letterList.letterCount[random]--;
     return letter;
@@ -283,7 +281,7 @@ void addScorePlayer(char letter, game * mainGame){
 }
 
 void changeTurn(game * mainGame){
-    printf("numPlayers: %d\n", mainGame->numPlayers);
+    
     if (mainGame->currentPlayer == mainGame->numPlayers - 1){
         
         mainGame->currentPlayer = 0;
@@ -294,10 +292,33 @@ void changeTurn(game * mainGame){
 
 
 }
-bool checkIfPositionsAreValid(int yArr[], int xArr[], int size, board *gameBoard){
-    
-    return false;
+
+void setStringToEmpty(int n, char *string){
+    for(int i = 0; i < n; i++){
+        string[i] = '\0';
+    }
 }
+
+bool checkIfWordIsInLetters(char * temp, game * mainGame){
+    bool found = false;
+    for(int i = 0; i < strlen(temp); i++){
+       
+        for(int j = 0; j < 7; j++){
+            if(temp[i] == mainGame->players[mainGame->currentPlayer].letters[j].letter){
+                found = true;
+                j = 7;
+            }
+        }
+        if(!found){
+            printf("went here\n");
+            return false;
+        }
+    }
+    return found;
+    
+}
+
+
 void choiceController(game * mainGame){
     char temp[15] = "\0";
     char temp1[20];
@@ -321,17 +342,43 @@ void choiceController(game * mainGame){
             int direction;
             while (repeat == 1){
                 
-                
-                printf("Letters to use(input is case sensitive, should not have spaces, should be consistent with order): ");
-                scanf("%s", temp);
-                printf("X: ");
-                scanf("%d", &originY);
-                printf("Y: ");
-                scanf("%d", &originX);
-                printf("1. Down\n");
-                printf("2. Right\n");
-                printf("Direction: ");
-                scanf("%d", &direction);
+                int repeatDoWhile = 1;
+                do{
+                    repeatDoWhile = 1;
+                    do{
+                        printf("Letters to use(input is case sensitive, should not have spaces, should be consistent with order): ");
+                        scanf("%s", temp);
+                        if (checkIfWordIsInLetters(temp, mainGame) == false){
+                            printf("You do not have all the letters in your word\n");
+                        }
+                    }while(checkIfWordIsInLetters(temp, mainGame) == false);
+                    printf("X: ");
+                    scanf("%d", &originY);
+                    printf("Y: ");
+                    scanf("%d", &originX);
+                    printf("1. Down\n");
+                    printf("2. Right\n");
+                    printf("Direction: ");
+                    scanf("%d", &direction);
+                    int count = 0;
+                    //count the wordCount of all players
+                    for(int i = 0; i < mainGame->numPlayers; i++){
+                        count += mainGame->players[i].wordCount;
+                    }
+                    if (count == 0 ){
+                        if (direction == 1 && ((originX == 5) || (originX + strlen(temp) > 5 && originX < 5))){
+                            repeatDoWhile = 0;
+                        
+                        }else if(direction == 2 && ((originY == 5) || (originY + strlen(temp) > 5 && originY < 5))){
+                            repeatDoWhile = 0;
+                        }else{
+                            printf("As your first move, first inputs must be in the middle of the board\n");
+                        }
+                    }else{
+                        repeatDoWhile = 0;
+                    }
+
+                }while(repeatDoWhile == 1);
                 
                 if ((originY + strlen(temp) > 11 && direction == 2) || originY < 0 || originY > 10){
                     printf("Invalid move, out of bounds\n");
@@ -366,8 +413,7 @@ void choiceController(game * mainGame){
                         }
                         if (exit == 1){
                             //check if word is valid after
-                            printf("temp1: %s\n", temp1);
-                            printf("score: %d\n", score);
+                            
                             //if valid
                             if (searchWordInDictionary(temp1, &(mainGame->dictionary)) == true){
                                 count = 0;
@@ -376,7 +422,7 @@ void choiceController(game * mainGame){
                                         count++;
                                         
                                     }else if(mainGame->gameBoard.tiles[originX+count][originY].isEmpty == true){
-                                        printf("here\n");
+                                        
                                         mainGame->gameBoard.tiles[originX+count][originY].letter.letter = temp[i];
                                         mainGame->gameBoard.tiles[originX+count][originY].isEmpty = false;
                                         swapPlayerLetterWithNewOne(mainGame, temp[i]);
@@ -423,35 +469,39 @@ void choiceController(game * mainGame){
                             }
                         }
                         if (exit == 1){
-                            printf("temp1: %s\n", temp1);
-                            printf("score: %d\n", score);
+                           
                             //if valid
-                            count = 0;
-                            for(int i = 0; i < strlen(temp);){
-                                if (mainGame->gameBoard.tiles[originX][originY+count].isEmpty == false){
-                                    count++;
+                            if(searchWordInDictionary(temp1, &(mainGame->dictionary)) == true){
+                                count = 0;
+                                for(int i = 0; i < strlen(temp);){
+                                    if (mainGame->gameBoard.tiles[originX][originY+count].isEmpty == false){
+                                        count++;
 
+                                        
+                                    }else if(mainGame->gameBoard.tiles[originX][originY+count].isEmpty == true){
                                     
-                                }else if(mainGame->gameBoard.tiles[originX][originY+count].isEmpty == true){
-                                    printf("here\n");
-                                    mainGame->gameBoard.tiles[originX][originY+count].letter.letter = temp[i];
-                                    swapPlayerLetterWithNewOne(mainGame,temp[i]);
-                                    mainGame->gameBoard.tiles[originX][originY+count].isEmpty = false;
-                                    mainGame->gameBoard.tiles[originX][originY+count].letter.owner = mainGame->currentPlayer;
-                                    mainGame->gameBoard.tiles[originX][originY+count].letter.value = getScoreOfCharacter(temp[i]);
-                                    i++;
-                                    count++;
+                                        mainGame->gameBoard.tiles[originX][originY+count].letter.letter = temp[i];
+                                        swapPlayerLetterWithNewOne(mainGame,temp[i]);
+                                        mainGame->gameBoard.tiles[originX][originY+count].isEmpty = false;
+                                        mainGame->gameBoard.tiles[originX][originY+count].letter.owner = mainGame->currentPlayer;
+                                        mainGame->gameBoard.tiles[originX][originY+count].letter.value = getScoreOfCharacter(temp[i]);
+                                        i++;
+                                        count++;
+                                        
+                                    }
                                     
                                 }
+                                int playerIndex = mainGame->players[mainGame->currentPlayer].recordIndex;
+                                strcpy(mainGame->records.records[playerIndex].words[mainGame->players[mainGame->currentPlayer].wordCount], temp1);
+
                                 
+                                mainGame->players[mainGame->currentPlayer].wordCount++;
+                                mainGame->players[mainGame->currentPlayer].score += score;
+                                changeTurn(mainGame);
+                                repeat = 0;
+                            }else{
+                                printf("Word not found. Go again\n");
                             }
-                            int playerIndex = mainGame->players[mainGame->currentPlayer].recordIndex;
-                            strcpy(mainGame->records.records[playerIndex].words[mainGame->players[mainGame->currentPlayer].wordCount], temp1);
-
-
-                            mainGame->players[mainGame->currentPlayer].wordCount++;
-                            mainGame->players[mainGame->currentPlayer].score += score;
-                            repeat = 0;
                         }
                     
                     }
@@ -493,6 +543,7 @@ void choiceController(game * mainGame){
                 printf("Continue replacing letters? (1 for yes, 0 for no): ");
                 scanf("%d", &continueAsk);
             }
+            changeTurn(mainGame);
         }
         
     
@@ -555,7 +606,7 @@ void initializeLetterList(game *mainGame){
 int askForName(game *mainGame){
     char yesOrNo = 'y';
     int i = 0;
-    while (yesOrNo == 'y' && i <= 4){
+    while (yesOrNo == 'y' && i <= 4 ){
         printf("Enter name of player : ");
         scanf("%s", mainGame->players[i].name);
         mainGame->players[i].recordIndex = -1;
@@ -578,9 +629,9 @@ void initializeRecords(game * mainGame){
             printf("Error opening file\n");
             exit(1);
         }else{
-            int recordcount = 0;
+            
             fscanf(fp, "%d", &mainGame->records.recordCount);
-            printf("record number: %d\n", mainGame->records.recordCount);
+            
             for(int i = 0; i < mainGame->records.recordCount; i++){
                 fscanf(fp, "%s", mainGame->records.records[i].name);
             
@@ -619,7 +670,7 @@ void matchRecords(game *mainGame){
     for(int i = 0; i < mainGame->records.recordCount; i++){
         for(int j = 0; j < mainGame->numPlayers; j++){
             if (strcmp(mainGame->players[j].name, mainGame->records.records[i].name) == 0){
-                printf("Match found\n");
+                printf("Match found for %s\n", mainGame->players[j].name);
                 mainGame->players[j].recordIndex = i;
                 
             }
@@ -652,7 +703,7 @@ void initPlayersToEmpty(game *mainGame){
         mainGame->records.records[i].highestScore = 0;
         strcpy(mainGame->records.records[i].longestWord, "");
         for(int j = 0; j < 15; j++){
-            strcpy(mainGame->records.records[i].words[j], "\0");
+            setStringToEmpty(30, mainGame->records.records[i].words[j]);
         }
     }
     
@@ -664,8 +715,7 @@ void lookForLongestWord(int index, game* mainGame){
     strcpy(longestWord, "");
     int playerIndex = mainGame->players[index].recordIndex;
     for(int i = 0; i < 15; i++){
-        int wordLen = strlen(mainGame->records.records[playerIndex].words[i]);
-        int longestWordLen = strlen(mainGame->records.records[i].longestWord);
+        
         if (strlen(mainGame->records.records[playerIndex].words[i]) > strlen(mainGame->records.records[i].longestWord)){
             strcpy(longestWord, mainGame->records.records[playerIndex].words[i]);
             
@@ -678,11 +728,11 @@ void lookForLongestWord(int index, game* mainGame){
 }
 
 void updateRecords(game *mainGame){
-    printf("update records Player's high score: %d\n", mainGame->records.records[mainGame->players[mainGame->currentPlayer].recordIndex].highestScore);
+   
     for(int i = 0; i < mainGame->numPlayers; i++){
         lookForLongestWord(i, mainGame);
         if (mainGame->players[i].score > mainGame->records.records[mainGame->players[i].recordIndex].highestScore){
-            printf("set to currentscore\n");
+            
             mainGame->records.records[mainGame->players[i].recordIndex].highestScore = mainGame->players[i].score;
         }
         mainGame->records.records[mainGame->players[i].recordIndex].gamesPlayed++;
