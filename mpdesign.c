@@ -277,33 +277,7 @@ void displayBoard(game * mainGame){
     printf("\n");
 
 }
-bool checkIfCoordinatesAreConnected(int yArr[], int xArr[], int size){
-    /*
-    This function checks if the coordinates of the tiles are connected.
-    @param yArr - an array of integers that contains the y coordinates of the tiles
-    @param xArr - an array of integers that contains the x coordinates of the tiles
-    @param size - an integer that contains the size of the arrays
-    @return - a boolean value that indicates if the coordinates are connected or not
-    */
-    for(int i = 0; i < size; i++){
-        if (size > i + 1){
-            //compute for distance between two points
-            int xDistance = abs(xArr[i] - xArr[i+1]);
-            int yDistance = abs(yArr[i] - yArr[i+1]);
-            if (xDistance + yDistance > 1){
-                
-                return false;
-            }
 
-        }else if (size == 1){
-            return false;
-        }
-        
-    }
-    
-    return true;
-
-}
 
 char getRandomLetter(game * mainGame){
     /*
