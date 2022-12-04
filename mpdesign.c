@@ -232,7 +232,7 @@ int getScoreOfCharacter(char letter){
     char letters[] = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z', '_'};
     int score[] = {1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10,0};
     for(int i = 0; i < 27;i ++){
-        if (letters[i] == letter){
+        if (letters[i] == toupper(letter)){
             printf("added %d score for %c\n", score[i], letter);
             return score[i];
         }
